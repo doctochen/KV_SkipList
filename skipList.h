@@ -82,7 +82,7 @@ public:
 	int insertElement(K, V);
 	void displayList();
 	bool searchElement();
-	void deleteElement();
+	void deleteElement(K);
 	void dumpFile();
 	void loadFile();
 	void clear(Node<K, V>*);
@@ -90,10 +90,10 @@ public:
 
 private:
 	void get_key_value_form_string(const std::string& str, std::string* key, std::string* value);
-
+	bool is_valid_string(const std::string& str);
 
 private:
-	int _max_level;
+	const int _max_level;
 
 	int _skip_list_level;
 
@@ -179,6 +179,42 @@ void SkipList<K, V>::displayList()
 }
 
 template<typename K, typename V>
+void SkipList<K, V>::deleteElement(K key)
+{
+	std::unique_lock<std::mutex> lock(mtx);
+	Node<K, V>* current = header;
+	Node<K, V>* updateNode[_max_level + 1];
+	memset(updateNode, 0, sizeof(Node<K, V>*) * (_max_level + 1));
+
+	for (int j = _skip_list_level; j >= 0; j--)
+	{
+		while (current->forward[j] != nullptr && current->forward[j]->getkey() < key)
+			current = current->forward[j];
+		updateNode[j] = current;
+	}
+
+	current = current->forward[0];
+
+	if (curren != nullptr && current->getKey() == key)
+	{
+		for (int j = 0; j <= _skip_list_level; j++)
+		{
+			if (updateNode[j]->forward[j] != current)
+				break;
+			updateNode[j]->forward[j] = current->forward[j];
+		}
+
+		while (_skip_list_level > 0 && header->forward[_skip_list_level] == 0)
+			_skip_list_level--;
+
+		std::cout << "Successfully deleted key " << key << std::endl;
+		delete current;
+		_element_count--;
+	}
+	return;
+}
+
+template<typename K, typename V>
 void SkipList<K, V>::dumpFile()
 {
 	std::cout << "dump file------------------" << std::endl;
@@ -218,3 +254,27 @@ void SkipList<K, V>::loadFile()
 	delete value;
 	_file_reader.close();
 }
+
+template<typename K, typename V>
+int SkipList<K, V>::size()
+{
+	return _element_count;
+}
+
+template<typename K, typename V>
+void SkipList<K, V>::get_key_value_form_string(const std::string& str, std::string* key, std::string* value)
+{
+	if (!is_valid_string(str)) return;
+	*key = str.substr(0, str.find(delimiter));
+	*value = str.substr(str.find(delimiter) + 1, str.length());
+}
+
+template<typename K, typename V>
+bool SkipList<K, V>::is_valid_string(const std::string& str)
+{
+	if (str.empty()) return false;
+	if (str.find(delimiter) == std::string::npos) return false;
+	return true;
+}
+
+
