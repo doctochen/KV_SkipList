@@ -132,6 +132,21 @@ SkipList<K, V>::~SkipList()
 }
 
 template<typename K, typename V>
+int SkipList<K, V>::getRandomLevel()
+{
+	int k = 0;
+	for (;;)
+	{
+		if (rand() % 2 == 0)
+		{
+			return k;
+		}
+		k++;
+		if (k == _max_level) return k;
+	}
+}
+
+template<typename K, typename V>
 Node<K,V>* SkipList<K, V>::create_node(const K k,const V v, int level)
 {
 	Node<K, V> n = new Node<K, V>(k, v, level);
@@ -300,6 +315,14 @@ void SkipList<K, V>::loadFile()
 	delete key;
 	delete value;
 	_file_reader.close();
+}
+
+template<typename K, typename V>
+void SkipList<K, V>::clear(Node<K, V>* cur)
+{
+	if (cur->forward[0] != nullptr)
+		clear(cur->forward[0]);
+	delete cur;
 }
 
 template<typename K, typename V>
