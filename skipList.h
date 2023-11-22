@@ -31,7 +31,7 @@ private:
 };
 
 template<typename K, typename V>
-Node<K, V>::Node(K k, V v, int level)
+Node<K, V>::Node(K k, V v, const int level)
 {
 	this->key = k;
 	this->value = v;
@@ -104,6 +104,32 @@ private:
 
 	int _element_count;
 };
+
+template<typename K, typename V>
+SkipList<K, V>::SkipList(int maxLevel): _max_level(maxLevel)
+{
+	this->_skip_list_level = 0;
+	this->_element_count = 0;
+
+	K k;
+	V v;
+	this->header = new Node<K, V>(k, v, _max_level);
+}
+
+template<typename K, typename V>
+SkipList<K, V>::~SkipList()
+{
+	if (_file_writer.is_open())
+		_file_writer.close();
+	if (_file_reader.is_open())
+		_file_reader.close();
+
+	if (header->forward[0] != nullptr)
+	{
+		clear(header->forward[0]);
+	}
+	delete header;
+}
 
 template<typename K, typename V>
 Node<K,V>* SkipList<K, V>::create_node(const K k,const V v, int level)
