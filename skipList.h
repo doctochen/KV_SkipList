@@ -81,7 +81,7 @@ public:
 	Node<K,V>* create_node(K, V, int);
 	int insertElement(K, V);
 	void displayList();
-	bool searchElement();
+	bool searchElement(K);
 	void deleteElement(K);
 	void dumpFile();
 	void loadFile();
@@ -176,6 +176,27 @@ void SkipList<K, V>::displayList()
 		}
 		std::cout << std::endl;
 	}
+}
+
+template<typename K, typename V>
+bool SkipList<K, V>::searchElement(K key)
+{
+	std::cout << "searchElement------------------\n";
+	Node<K, V>* current = header;
+
+	for (int j = _skip_list_level; j >= 0; j--)
+	{
+		while (current != nullptr && current->forward[j]->getkey() < key)
+			current = current->forward[j];
+	}
+	current = current->forward[0];
+	if (current != nullptr && current->getKey() == Key)
+	{
+		std::cout << "found key: " << current->getKey() << " value: " << current->getValue() << std::endl;
+		return true;
+	}
+	std::cout << "Not Found Key" << std::endl;
+	return false;
 }
 
 template<typename K, typename V>
